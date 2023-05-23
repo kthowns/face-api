@@ -109,23 +109,6 @@ app.get('/columnCount', (req, res) => {
   });
 });
 
-
-// 등록된 얼굴 디스크립터 가져오기
-app.get('/getLabeledDescriptors', (req, res) => {
-  connection.query('SELECT img FROM students', (error, results) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      const labeledDescriptors = {};
-      results.forEach(row => {
-        labeledDescriptors[row.st_id] = row.img;
-      });
-      res.json(labeledDescriptors);
-    }
-  });
-});
-
 app.get('/getImages', (req, res) => {
   const query = 'SELECT img FROM students';
 
@@ -138,21 +121,6 @@ app.get('/getImages', (req, res) => {
       }
   });
 });
-
-
-// 출석 처리
-app.post('/markAttendance', (req, res) => {
-  const studentId = req.body.studentId;
-  connection.query('UPDATE students SET attend = ? WHERE st_id = ?', ['o', studentId], (error, results) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      res.json({ success: true });
-    }
-  });
-});
-
 
 app.use(express.json())
 
