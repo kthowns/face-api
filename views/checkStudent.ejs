@@ -1,0 +1,41 @@
+<HTML>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+        <link href="css/style.css" type="text/css" rel="stylesheet">
+        <title>checkStudent</title>
+        <h1>학생정보</h1>
+    </head>
+    
+    <body>
+        <nav id="topMenu">
+            <ul>
+                <li><a class="menuLink" href="signStudent.html">학생등록</a></li>
+                <li><a class="menuLink" href="checkAttendance.html">출석체크</a></li>
+                <li><a class="menuLink" href="checkStudent">학생정보</a></li>
+            </ul>
+        </nav>
+        <table id="my-table" border="1">
+            <tr><td>이름</td><td>학번</td><td>출석체크 날짜</td><td>출석</td></tr>
+            <% users.forEach(function(user) { %>
+            <tr>
+                <td><%= user.st_name %></td>
+                <td><%= user.st_number %></td>
+                <td><%= user.today %></td>
+                <td><%= user.attend %></td>
+            </tr>
+            <% }); %>
+        </table>
+        <button onclick="exportToExcel()">엑셀 Export</button>
+        <script>
+            function exportToExcel() {
+                // 테이블 요소 선택
+                var table = document.getElementById("my-table");
+                // 워크북 생성
+                var workbook = XLSX.utils.table_to_book(table);
+                // 워크북을 Excel 파일로 저장
+                XLSX.writeFile(workbook, "data.xlsx");
+            }
+        </script>
+    </body>
+</HTML>

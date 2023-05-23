@@ -1,0 +1,31 @@
+h1{
+    text-align: center;
+}
+#topMenu {            
+    height: 30px; 
+    width: 850px;
+    text-align: center;
+}
+#topMenu ul li { 
+    display: inline-block;
+    list-style: none; 
+    color: white;              
+    background-color: #2d2d2d;  
+    /*float: left;*/                
+    line-height: 30px;          
+    vertical-align: middle;     
+    text-align: center;         
+}
+#topMenu .menuLink {                               
+    text-decoration:none;                      
+    color: white;                              
+    display: block;                            
+    width: 150px;                              
+    font-size: 12px;                           
+    font-weight: bold;                         
+    font-family: "Trebuchet MS", Dotum, Arial; 
+}
+#topMenu .menuLink:hover {            
+    color: green;                   
+    background-color: #4d4d4d;    
+}

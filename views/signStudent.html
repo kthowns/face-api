@@ -1,0 +1,82 @@
+<HTML>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+        <script defer src="../face-api.min.js"></script>
+        <link href="css/style.css" type="text/css" rel="stylesheet">
+        <title>signStudent</title>
+        <h1>학생등록</h1>
+    </head>
+    
+    <body>
+        <nav id="topMenu">
+            <ul>
+                <li><a class="menuLink" href="signStudent.html">학생등록</a></li>
+                <li><a class="menuLink" href="checkAttendance.html">출석체크</a></li>
+                <li><a class="menuLink" href="checkStudent">학생정보</a></li>
+            </ul>
+        </nav>
+ 
+        <video id="video" width="400" height="300" autoplay></video>
+        <table>      
+            <tr>
+                <td><input type="text" id="nameInput" placeholder="이름"></td>
+                <td><input type="text" id="numberInput" placeholder="학번"></td>
+            </tr>
+            <tr><td><button id="captureBtn">등록</button></td><td><p id="uploadResult"></p></td></tr>
+        </table>
+        
+        <script>
+            const nameInput = document.getElementById('nameInput');
+            const numberInput = document.getElementById('numberInput');
+            const video = document.getElementById('video');
+            const captureBtn = document.getElementById('captureBtn');
+
+            // 웹캠 스트림 시작
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('웹캠 스트림 시작 실패:', error);
+            });
+
+            // 이미지 캡처 및 서버로 전송
+            captureBtn.addEventListener('click', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob(blob => {
+                    const formData = new FormData();
+                    formData.append('image', blob, 'capture.jpg');
+                    formData.append('st_name', nameInput.value);
+                    formData.append('st_number', numberInput.value);
+
+                    // 현재 날짜 및 시간 데이터 추가
+                    const nowDate = new Date();
+                    const currentDate = nowDate.getFullYear() + '/' + nowDate.getMonth() + '/' + nowDate.getDay();
+                    formData.append('today', currentDate);
+
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('이미지 업로드 성공');
+                            document.getElementById("uploadResult").innerText = "등록완료";
+                        } else {
+                            console.error('이미지 업로드 실패');
+                            document.getElementById("uploadResult").innerText = "등록실패";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('이미지 업로드 실패:', error);
+                    });
+                }, 'image/jpeg');
+            });
+        </script>
+    </body>
+</HTML>

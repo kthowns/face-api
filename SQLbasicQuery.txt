@@ -1,0 +1,20 @@
+create database IF NOT EXISTS anutest;
+
+use anutest;
+
+create table IF NOT EXISTS students (            
+   st_id int AUTO_INCREMENT PRIMARY KEY,
+   st_name varchar(20) not null,
+   st_number varchar(20) not null,
+   attend char default 'X',
+   today date,
+   img 	LONGBLOB,
+   dscrpt TEXT
+)ENGINE=INNODB;
+
+
+SELECT *
+FROM students;
+
+#ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+#or in node.js , const mysql = require('mysql2');

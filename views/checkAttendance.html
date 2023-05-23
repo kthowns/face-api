@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Capture</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="css/style.css" type="text/css" rel="stylesheet">
+  <script src="./face-api.min.js"></script>
+</head>
+<body>
+  <h1>출석체크</h1>        
+  <nav id="topMenu">
+    <ul>
+        <li><a class="menuLink" href="signStudent.html">학생등록</a></li>
+        <li><a class="menuLink" href="checkAttendance.html">출석체크</a></li>
+        <li><a class="menuLink" href="checkStudent">학생정보</a></li>
+    </ul>
+</nav>
+  <video id="video" width="400" height="300" autoplay></video>
+  <button id="captureButton">출석</button>
+  <a id="status"></a>
+
+  <script>
+    // 웹캠 스트림 시작
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        video.srcObject = stream;
+    })
+    .catch(error => {
+        console.error('웹캠 스트림 시작 실패:', error);
+    });
+    // 이미지 파일을 face descriptor로 변환하는 함수
+    async function getFaceDescriptor(image) {
+      const imgElement = document.createElement('img');
+      imgElement.src = image;
+
+      // 이미지를 face descriptor로 변환
+      const detection = await faceapi.detectSingleFace(imgElement).withFaceLandmarks().withFaceDescriptor();
+      return detection.descriptor;
+    }
+
+    // 두 이미지의 유사도를 계산하는 함수
+    async function calculateSimilarity(imageA, imageB) {
+      document.getElementById('status').innerText = "Comparing....";
+      const descriptorA = await getFaceDescriptor(imageA);
+      console.log("Image A");
+      const descriptorB = await getFaceDescriptor(imageB);
+      console.log("Image B");
+      const distance = faceapi.euclideanDistance(descriptorA, descriptorB);
+      console.log("distance");
+      console.log(distance);
+
+      return distance;
+    }
+
+    // 이미지 캡처 함수
+    async function captureImage() {
+      // 웹캠에서 이미지 캡처
+      document.getElementById('status').innerText = "Capturing....";
+      const captureStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const videoElement = document.createElement('video');
+      videoElement.srcObject = captureStream;
+      await videoElement.play();
+      document.getElementById('status').innerText = "Captured.";
+
+      // 캡처된 이미지를 캔버스에 그림
+      const canvasElement = document.createElement('canvas');
+      const context = canvasElement.getContext('2d');
+      canvasElement.width = videoElement.videoWidth;
+      canvasElement.height = videoElement.videoHeight;
+      context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+      // 이미지 데이터를 URL로 변환
+      const imageDataURL = canvasElement.toDataURL();
+
+      // 캡처된 이미지 데이터 처리 및 비교
+      const capturedImage = imageDataURL;
+      console.log("CAPTUREIMAGE");
+
+      fetch('/getImages')
+      .then(response => response.json())
+      .then(databaseImages => {
+        return getColumnCount().then(async columnCount => {     // face-api.js 모델 로드
+          //document.getElementById('status').innerText = "Loading Model....";
+          await faceapi.loadSsdMobilenetv1Model('./models');
+          await faceapi.loadFaceLandmarkModel('./models');
+          await faceapi.loadFaceRecognitionModel('./models');
+          for (let i = 0; i < columnCount-1; i++) {
+            console.log(i);
+            if (databaseImages.images[i].img) {
+              const arrayBuffer = databaseImages.images[i].img.data;
+              const base64Image = bufferToBase64(arrayBuffer);
+              const similarity = await calculateSimilarity(capturedImage, base64Image);
+
+              if (similarity <= 0.38) {
+                // attend 값을 'o'로 업데이트
+                document.getElementById('status').innerText = "Attended!!";
+                await updateAttendValue(i+1);
+                break;
+              }else{
+                document.getElementById('status').innerText = "Attending....";
+              }
+            }
+          }
+        });
+      })
+      .catch(error => {
+        console.error('이미지 데이터 가져오기 실패:', error);
+      });
+    }
+
+    //Buffer 형식의 이미지 파일을 Base64로 인코딩
+    function bufferToBase64(buffer) {
+      const binary = Array.from(new Uint8Array(buffer));
+      const base64 = btoa(binary.map(byte => String.fromCharCode(byte)).join(''));
+      return `data:image/jpeg;base64,${base64}`;
+    }
+
+
+
+    // attend 값을 'o'로 업데이트하는 함수
+    async function updateAttendValue(index) {
+  try {
+    const response = await $.ajax({
+      url: '/updateAttendValue',
+      type: 'POST',
+      data: { index },
+    });
+
+    console.log(`Attend value updated for index ${index}`);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+    // 버튼 클릭 이벤트 핸들러
+    $('#captureButton').on('click', () => {
+      captureImage();
+    });
+
+    async function getColumnCount() {
+  try {
+    const response = await fetch('/columnCount');
+    const data = await response.json();
+    const columnCount = data.columnCount;
+    return columnCount; // columnCount 값을 반환
+  } catch (error) {
+    console.error('Error:', error);
+    return 0; // 에러 발생 시 기본값으로 0을 반환하거나 다른 적절한 값을 반환
+  }
+}
+
+  </script>
+</body>
+</html>
