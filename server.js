@@ -122,6 +122,25 @@ app.get('/getImages', (req, res) => {
   });
 });
 
+app.post('/attend', (req, res) => {
+  const studentNumber = req.body.student_number;
+
+  // 학번과 일치하는 레코드의 attend 열을 'o'로 업데이트하는 쿼리
+  const sql = `UPDATE students SET attend = 'o' WHERE st_number = ?`;
+
+  // 쿼리 실행
+  connection.query(sql, [studentNumber], (err, result) => {
+    if (err) {
+      console.error('쿼리 실행 오류:', err);
+      res.status(500).json({ error: '서버 오류' });
+      return;
+    }
+
+    console.log('출석 처리 완료');
+    res.json({ message: '출석 처리 완료' });
+  });
+});
+
 app.use(express.json())
 
 const viewsDir = path.join(__dirname, 'views')

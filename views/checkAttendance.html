@@ -17,6 +17,12 @@
 </nav>
   <video id="video" width="400" height="300" autoplay></video>
   <button id="captureButton">출석</button>
+  <table>      
+    <tr>
+        <td><button id="attendManual">수동 출석</button></td>
+        <td><input type="text" id="numberInput" placeholder="학번"></td>
+    </tr>
+</table>
   <a id="status"></a>
 
   <script>
@@ -146,6 +152,31 @@
     return 0; // 에러 발생 시 기본값으로 0을 반환하거나 다른 적절한 값을 반환
   }
 }
+
+  document.getElementById('attendManual').addEventListener('click', function() {
+      var numberInput = document.getElementById('numberInput').value;
+
+      fetch('/attend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ student_number: numberInput })
+      })
+      .then(function(response) {
+        if (response.ok) {
+          console.log('출석 처리 완료');
+          alert('출석 처리가 완료되었습니다.');
+        } else {
+          console.error('출석 처리 오류:', response.status);
+          alert('출석 처리 중 오류가 발생했습니다.');
+        }
+      })
+      .catch(function(error) {
+        console.error('네트워크 오류:', error);
+        alert('네트워크 오류가 발생했습니다.');
+      });
+    });
 
   </script>
 </body>
