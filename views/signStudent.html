@@ -3,7 +3,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
         <script defer src="../face-api.min.js"></script>
         <link href="css/style.css" type="text/css" rel="stylesheet">
-        <title>signStudent</title>
+        <title>학생등록</title>
         <h1>학생등록</h1>
     </head>
     
@@ -22,7 +22,10 @@
                 <td><input type="text" id="nameInput" placeholder="이름"></td>
                 <td><input type="text" id="numberInput" placeholder="학번"></td>
             </tr>
-            <tr><td><button id="captureBtn">등록</button></td><td><p id="uploadResult"></p></td></tr>
+            <tr>
+                <td><button id="captureBtn">등록</button></td><td><p id="uploadResult"></p></td>
+                <td><button id="adminLogin">관리자 페이지</button></td>
+            </tr>
         </table>
         
         <script>
@@ -30,7 +33,12 @@
             const numberInput = document.getElementById('numberInput');
             const video = document.getElementById('video');
             const captureBtn = document.getElementById('captureBtn');
-
+            const target = document.getElementById('adminLogin');
+            //target.disabled = true;
+            function adminBtn() {
+                const target = document.getElementById('adminLogin');
+                target.disabled = false;
+            }
             // 웹캠 스트림 시작
             navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {

@@ -12,6 +12,9 @@ create table IF NOT EXISTS students (
    dscrpt TEXT
 )ENGINE=INNODB;
 
+create user 'user01'@'%' identified by 'password';
+
+grant all privileges on anutest.* to 'user01'$'%';
 
 SELECT *
 FROM students;

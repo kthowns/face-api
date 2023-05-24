@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Image Capture</title>
+  <title>출석체크</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="css/style.css" type="text/css" rel="stylesheet">
   <script src="./face-api.min.js"></script>
@@ -91,7 +91,7 @@
               const base64Image = bufferToBase64(arrayBuffer);
               const similarity = await calculateSimilarity(capturedImage, base64Image);
 
-              if (similarity <= 0.38) {
+              if (similarity <= 0.30) { //유사도 30 이하
                 // attend 값을 'o'로 업데이트
                 document.getElementById('status').innerText = "Attended!!";
                 await updateAttendValue(i+1);
